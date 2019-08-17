@@ -6,20 +6,30 @@
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "resolveJsonModule": true,
     "sourceMap": true,
-    "target": "es5",
+    "target": "esnext",
     "lib": [
-      "es2015",
+      "esnext",
       "dom"
     ],
     "moduleResolution": "node",
     "baseUrl": "src",
-    "allowJs": true
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    
+    "jsx": "preserve",
+    "importHelpers": true
+    // "strict": false,
+    // "esModuleInterop": true,
   },
   "include": [
     "./src/**/*.ts",
     "./test/**/*.ts",
     "./types/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
   ],
   "atom": {
     "rewriteTsconfig": false

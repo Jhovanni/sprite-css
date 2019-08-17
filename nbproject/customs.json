@@ -1,0 +1,12 @@
+{
+    "elements": {},
+    "attributes": {
+        "click.delegate": {},
+        "files.bind": {
+            "context": "input"
+        },
+        "value.bind": {},
+        "show.bind": {},
+        "innerhtml.bind": {}
+    }
+}
