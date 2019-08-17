@@ -56,7 +56,7 @@
  
  
  ******************************************************************************/
-import {Bloque, Nodo} from "./modelo";
+import { Bloque, Nodo } from "./modelo";
 
 export class GrowingPacker {
     root: Nodo;
@@ -67,7 +67,7 @@ export class GrowingPacker {
         var len = blocks.length;
         var w = len > 0 ? blocks[0].w : 0;
         var h = len > 0 ? blocks[0].h : 0;
-        this.root = <Nodo> {x: 0, y: 0, w: w, h: h};
+        this.root = <Nodo>{ x: 0, y: 0, w: w, h: h };
         for (var i = 0; i < blocks.length; i++) {
             var block = blocks[i];
             var node = this.findNode(this.root, block.w, block.h);
@@ -78,7 +78,7 @@ export class GrowingPacker {
         }
     }
 
-    findNode(root: Nodo, w: number, h: number): Nodo {
+    private findNode(root: Nodo, w: number, h: number): Nodo {
         if (root.used)
             return this.findNode(root.right, w, h) || this.findNode(root.down, w, h);
         else if ((w <= root.w) && (h <= root.h))
@@ -87,14 +87,14 @@ export class GrowingPacker {
             return null;
     }
 
-    splitNode(node: Nodo, w: number, h: number): Nodo {
+    private splitNode(node: Nodo, w: number, h: number): Nodo {
         node.used = true;
-        node.down = <Nodo> {x: node.x, y: node.y + h, w: node.w, h: node.h - h};
-        node.right = <Nodo> {x: node.x + w, y: node.y, w: node.w - w, h: h};
+        node.down = <Nodo>{ x: node.x, y: node.y + h, w: node.w, h: node.h - h };
+        node.right = <Nodo>{ x: node.x + w, y: node.y, w: node.w - w, h: h };
         return node;
     }
 
-    growNode(w: number, h: number): Nodo {
+    private growNode(w: number, h: number): Nodo {
         var canGrowDown = (w <= this.root.w);
         var canGrowRight = (h <= this.root.h);
 
@@ -113,15 +113,15 @@ export class GrowingPacker {
             return null; // need to ensure sensible root starting size to avoid this happening
     }
 
-    growRight(w: number, h: number): Nodo {
-        this.root = <Nodo> {
+    private growRight(w: number, h: number): Nodo {
+        this.root = <Nodo>{
             used: true,
             x: 0,
             y: 0,
             w: this.root.w + w,
             h: this.root.h,
             down: this.root,
-            right: {x: this.root.w, y: 0, w: w, h: this.root.h}
+            right: { x: this.root.w, y: 0, w: w, h: this.root.h }
         };
         var node = this.findNode(this.root, w, h);
         if (node)
@@ -130,14 +130,14 @@ export class GrowingPacker {
             return null;
     }
 
-    growDown(w: number, h: number): Nodo {
-        this.root = <Nodo> {
+    private growDown(w: number, h: number): Nodo {
+        this.root = <Nodo>{
             used: true,
             x: 0,
             y: 0,
             w: this.root.w,
             h: this.root.h + h,
-            down: {x: 0, y: this.root.h, w: this.root.w, h: h},
+            down: { x: 0, y: this.root.h, w: this.root.w, h: h },
             right: this.root
         };
         var node = this.findNode(this.root, w, h);

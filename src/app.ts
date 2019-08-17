@@ -1,11 +1,11 @@
-import {autoinject, TaskQueue} from 'aurelia-framework';
-import {ValidationRules, ValidationController, validateTrigger} from "aurelia-validation";
-import {BootstrapFormRenderer} from "./bootstrapFormRenderer";
-import {GrowingPacker} from "./packerGrowing";
-import {cargarImagenes, porcentage, colorAleatorio} from "./util";
-import {Bloque, Nodo} from "./modelo";
-
+import { autoinject, TaskQueue } from 'aurelia-framework';
+import { validateTrigger, ValidationController, ValidationRules } from "aurelia-validation";
 import * as SVG from "svg.js";
+import { BootstrapFormRenderer } from "./bootstrapFormRenderer";
+import { Bloque } from "./modelo";
+import { GrowingPacker } from "./packerGrowing";
+import { cargarImagenes, colorAleatorio, porcentage, descargarComoArchivo } from "./util";
+
 
 @autoinject
 export class App {
@@ -13,7 +13,6 @@ export class App {
     private prefijo: string = "sprite-";
     private archivos: FileList;
 
-    private nombreArchivo: string;
     private cssGenerado: string;
     private ejemplo = "";
     private ejemploVertical = "";
@@ -53,14 +52,13 @@ export class App {
         });
     }
     private generar(): void {
-        this.nombreArchivo = this.claseBase;
         this.cargarBloques().then(() => {
             this.packer = new GrowingPacker();
             this.packer.fit(this.bloques);
             this.dibujarImagenes();
             this.generarCss();
             this.taskqeue.queueMicroTask(() => {
-                document.getElementById("divGenerado").scrollIntoView({behavior: "smooth", block: "start"});
+                document.getElementById("divGenerado").scrollIntoView({ behavior: "smooth", block: "start" });
             });
         })
     }
@@ -86,19 +84,19 @@ export class App {
         dibujo.addClass("img-fluid");
         dibujo.addClass("center-block");
         var mouseover = function () {
-            this.fill({opacity: 1});
+            this.fill({ opacity: 1 });
         }
         var mouseout = function () {
-            this.fill({opacity: .1});
+            this.fill({ opacity: .1 });
         }
         for (var i = 0; i < this.bloques.length; i++) {
             var bloque = this.bloques[i];
             if (bloque.fit) {
-                var rec = dibujo.rect(bloque.w, bloque.h).move(bloque.fit.x, bloque.fit.y).fill({color: colorAleatorio(), opacity: .1}).stroke("#000000");
+                var rec = dibujo.rect(bloque.w, bloque.h).move(bloque.fit.x, bloque.fit.y).fill({ color: colorAleatorio(), opacity: .1 }).stroke("#000000");
                 dibujo.image(bloque.image.src).move(bloque.fit.x, bloque.fit.y).style("pointer-events", "none");
                 rec.on("mouseover", mouseover);
                 rec.on("mouseout", mouseout);
-                dibujo.plain((i + 1).toString()).move(bloque.fit.x, bloque.fit.y).font({size: 24, family: "Georgia"}).fill("#000000");
+                dibujo.plain((i + 1).toString()).move(bloque.fit.x, bloque.fit.y).font({ size: 24, family: "Georgia" }).fill("#000000");
             }
         }
     }
@@ -140,7 +138,7 @@ export class App {
             console.log("No hay texto generado");
             return;
         }
-        var t = <HTMLTextAreaElement> document.createElement("textarea");
+        var t = <HTMLTextAreaElement>document.createElement("textarea");
         t.style.position = 'fixed';
         t.style.top = "0";
         t.style.left = "0";
@@ -167,9 +165,6 @@ export class App {
             console.log("Packer no generado o sin imagenes");
             return;
         }
-        if (this.nombreArchivo === null) {
-            this.nombreArchivo = "png";
-        }
         var canvas = document.createElement("canvas");
         canvas.width = this.packer.root.w;
         canvas.height = this.packer.root.h;
@@ -180,25 +175,17 @@ export class App {
                 ctx.drawImage(bloque.image, bloque.fit.x, bloque.fit.y);
             }
         }
-        var a = document.createElement("a");
-        a.setAttribute("href", canvas.toDataURL("image/png"));
-        a.setAttribute("download", this.nombreArchivo + ".png");
-        a.style.display = "none";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        const contenido = canvas.toDataURL("image/png");
+        descargarComoArchivo(contenido, "sprites.png", document);
     }
     descargarTextoCSS(): void {
         if (this.cssGenerado === null) {
             console.log("No hay texto generado");
             return;
         }
-        var a = document.createElement("a");
-        a.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(this.cssGenerado));
-        a.setAttribute("download", "sprites.css");
-        a.style.display = "none";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        const contenido = "data:text/plain;charset=utf-8," + encodeURIComponent(this.cssGenerado);
+        descargarComoArchivo(contenido, "sprite.css", document);
     }
+
+
 }

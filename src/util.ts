@@ -48,3 +48,12 @@ export function colorAleatorio(opacidad?: number): string {
     }
     return "#".concat(colorHex).concat(opacidadHex);
 }
+export function descargarComoArchivo(contenido: string, nombreArchivo: string, document: Document): void {
+    var a = document.createElement("a");
+    a.setAttribute("href", contenido);
+    a.setAttribute("download", nombreArchivo);
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
