@@ -1,3 +1,83 @@
 <template>
-  <h1>${message}</h1>
+    <require from="./iconos.scss"></require>
+    <nav class="navbar navbar-dark navbar-expand-sm" style="background-color: #0b2545ff">
+        <a class="navbar-brand" href="#">SpriteCSS</a>
+    </nav>
+    <section class="container mt-4 mb-5">
+        <h1>SpriteCSS</h1>
+        <p>Genera reglas CSS para sprites autoajustables, usando imágenes locales</p>
+        <form>
+            <div class="form-group">
+                <label for="inputClaseBase">Clase Base</label>
+                <input type="text" class="form-control" placeholder="Clase base para todos los elementos" id="inputClaseBase" value.bind="claseBase & validate">
+            </div>
+            <div class="form-group">
+                <label for="inputPrefijo">Prefijo</label>
+                <input type="text" class="form-control" placeholder="Prefijo a cada elemento" id="inputPrefijo" value.bind="prefijo & validate">
+            </div>
+            <div class="form-group">
+                <label for="inputArchivos">Imagenes</label>
+                <input type="file" multiple accept="image/*" id="inputArchivos" files.bind="archivos & validate">
+            </div>
+            <button type="button" class="btn btn-primary" click.delegate="procesar()">Generar</button>
+        </form>
+    </section>
+    <section class="container mb-4" id="divGenerado" show.bind="cssGenerado">
+        <h2>Resultado</h2>
+        <div class="form-group">
+            <label for="cssGenerado">CSS</label>
+            <span class="float-right">
+                <a href="#" click.delegate="copiarTextoCSS()">Copiar&nbsp;<span class="icono-copy"></span></a>&nbsp;&nbsp;
+                <a href="#" click.delegate="descargarTextoCSS()">Descargar&nbsp;<span class="icono-download"></span></a>
+            </span>
+            <textarea class="form-control" value.bind="cssGenerado" rows="4" id="cssGenerado" style="resize: none;" readonly="true"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Ejemplo de uso</label>
+            <a href="#" class="float-right" click.delegate="verAjusteVertical = !verAjusteVertical" onclick="return false;">
+                Ajuste vertical&nbsp;<span class="icono-question"></span>
+            </a>
+            <pre innerhtml.bind="ejemplo">
+            </pre>
+        </div>
+        <div class="form-group text-justify" show.bind="verAjusteVertical">
+            <label>Ajuste vertical</label>
+            <p>
+                Para autoajustar elementos (como imagenes) en una página web, se requiere una&nbsp;
+                <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@media/aspect-ratio" rel="nofollow" target="_blank">relacion de aspecto</a>, 
+                así el navegador ajusta la imagen cuando el ancho de su contenedor cambia. 
+                No es posible autoajustar el ancho del elemento cuando la altura de su contenedor cambia.
+            </p>
+            <p>
+                Es poco común usar elementos autoajustables a la altura del contenedor. Pero en caso que desees, necesitas un&nbsp;
+                <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Replaced_element" rel="nofollow" target="_blank">elemento reemplazado</a>.
+                Una técnica popular es usar elementos &nbsp;<code>&lt;img&gt;</code>&nbsp;, 
+                cuyo atributo&nbsp;<code>src</code>&nbsp;hace referencia 
+                a una&nbsp;
+                <a href="https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding" rel="nofollow" target="_blank">imagen base 64</a>
+                &nbsp;transparente con las proporciones deseadas. 
+                Tambien es posible utilizar un elemento&nbsp;<code>&lt;svg&gt;</code>&nbsp;, definiendo 
+                proporciones en su atributo&nbsp;<code>viewBox</code>&nbsp;. 
+                En ambos casos es indispensable declarar las dimensiones de la imagen al definir el elemento.
+            </p>
+            <p>
+                Para lograr tal efecto con esta herramienta, dentro de un contenedor de altura definida, agrega la imagen siguiendo el ejemplo 
+                (cambia los valores&nbsp;<var>100</var>&nbsp;y&nbsp;<var>150</var>&nbsp;por las dimensiones de tu imagen):
+            </p>
+            <pre innerhtml.bind="ejemploVertical">
+            </pre>
+        </div>
+        <div class="form-group">
+            <label>Hoja de sprites</label>
+            <div class="col-xs-12 text-right">
+                <a href="#" download="png.png" click.delegate="descargarSpriteSheet()">
+                    Descargar imagen&nbsp;<span class="icono-download"></span>
+                </a>
+                <br>
+                <small><strong>Sugerencia:</strong>&nbsp;Usa un compresor como&nbsp;<a href="http://compresspng.com/" rel="nofollow" target="_blank">compresspng.com</a>&nbsp;para optimizar la imagen</small>
+            </div>
+            <div class="col-xs-12" id="dibujo">
+            </div>
+        </div>
+    </section>
 </template>

@@ -1,0 +1,59 @@
+$icomoon-font-family: "Cronicas-Iconos" !default;
+$icomoon-font-path: "/fonts" !default;
+
+$icono-copy: "\e92c";
+$icono-download: "\e960";
+$icono-question: "\ea09";
+$icono-circle-right: "\ea42";
+$icono-circle-left: "\ea44";
+
+@font-face {
+    font-family: '#{$icomoon-font-family}';
+    src:
+        url('#{$icomoon-font-path}/#{$icomoon-font-family}.ttf?jbkyao') format('truetype'),
+        url('#{$icomoon-font-path}/#{$icomoon-font-family}.woff?jbkyao') format('woff'),
+        url('#{$icomoon-font-path}/#{$icomoon-font-family}.svg?jbkyao##{$icomoon-font-family}') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+[class^="icono-"], [class*=" icono-"] {
+    /* use !important to prevent issues with browser extensions that change fonts */
+    font-family: '#{$icomoon-font-family}' !important;
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+
+    /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.icono-copy {
+    &:before {
+        content: $icono-copy; 
+    }
+}
+.icono-download {
+    &:before {
+        content: $icono-download; 
+    }
+}
+.icono-question {
+    &:before {
+        content: $icono-question; 
+    }
+}
+.icono-circle-right {
+    &:before {
+        content: $icono-circle-right; 
+    }
+}
+.icono-circle-left {
+    &:before {
+        content: $icono-circle-left; 
+    }
+}

@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const CompressionPlugin = require('compression-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
 const project = require('./aurelia_project/aurelia.json');
@@ -14,7 +15,7 @@ const when = (condition, config, negativeConfig) =>
   condition ? ensureArray(config) : ensureArray(negativeConfig);
 
 // primary config:
-const title = 'Aurelia Navigation Skeleton';
+const title = 'SpriteCSS';
 const outDir = path.resolve(__dirname, project.platform.output);
 const srcDir = path.resolve(__dirname, 'src');
 const testDir = path.resolve(__dirname, 'test', 'unit');
@@ -212,7 +213,20 @@ module.exports = ({ production, server, extractCss, coverage, analyze, karma } =
   },
   plugins: [
     ...when(!karma, new DuplicatePackageCheckerPlugin()),
-    new AureliaPlugin(),
+     new AureliaPlugin({
+        dist: "esnext",
+        aureliaConfig: [
+            "defaultBindingLanguage",
+            "defaultResources",
+            "developmentLogging"
+        ],
+        features: {//disable some features, 8kb gzip less
+            ie: false, //internet explorer polyfill not included
+            svg: false, //svg bindings not required
+            unparser: true, //requerido por aurelia-validation
+            polyfills: "esnext" //remove polifylls required by old browsers
+        }
+    }),
     new ProvidePlugin({
       'Promise': ['promise-polyfill', 'default']
     }),
@@ -243,6 +257,7 @@ module.exports = ({ production, server, extractCss, coverage, analyze, karma } =
       filename: production ? 'css/[name].[contenthash].bundle.css' : 'css/[name].[hash].bundle.css',
       chunkFilename: production ? 'css/[name].[contenthash].chunk.css' : 'css/[name].[hash].chunk.css'
     })),
+    ...when(production || server, new CompressionPlugin()),
     ...when(production || server, new CopyWebpackPlugin([
       { from: 'static', to: outDir, ignore: ['.*'] }])), // ignore dot (hidden) files
     ...when(analyze, new BundleAnalyzerPlugin())
