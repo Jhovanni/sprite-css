@@ -58,113 +58,115 @@
  ******************************************************************************/
 import {Bloque, Coord} from "./modelo";
 
-class Nodo {
-    x: number;
-    y: number;
-    h: number;
-    w: number;
-    right: Nodo;
-    down: Nodo;
-    used = false;
-    constructor(x: number, y: number, h: number, w: number) {
-        this.x = x;
-        this.y = y;
-        this.h = h;
-        this.w = w;
-    }
-}
 export class GrowingPacker {
-    root: Nodo;
-    fit(blocks: Bloque[]) {
-        blocks.sort((a, b) => {
+    private raiz: Nodo;
+    dimension: Coord;
+    fit(bloques: Bloque[]) {
+        bloques.sort((a, b) => {
             return (b.dimension.x + b.dimension.y) - (a.dimension.x + a.dimension.y);
         });
-        var len = blocks.length;
-        var w = len > 0 ? blocks[0].dimension.x : 0;
-        var h = len > 0 ? blocks[0].dimension.y : 0;
-        this.root = <Nodo> {x: 0, y: 0, w: w, h: h};
+        var cantidad = bloques.length;
+        var anchoInicial = cantidad > 0 ? bloques[0].dimension.x : 0;
+        var altoInicial = cantidad > 0 ? bloques[0].dimension.y : 0;
+        this.raiz = <Nodo> {posX: 0, posY: 0, ancho: anchoInicial, alto: altoInicial};
 
-        for (var i = 0; i < blocks.length; i++) {
-            var block = blocks[i];
-            var node = this.findNode(this.root, block.dimension.x, block.dimension.y);
+        for (var i = 0; i < cantidad; i++) {
+            var bloque = bloques[i];
+            var nodo = this.encontrarNodo(this.raiz, bloque.dimension.x, bloque.dimension.y);
 
             let nodoParaBloque = null;
-            if (node) {
-                nodoParaBloque = this.splitNode(node, block.dimension.x, block.dimension.y);
+            if (nodo) {
+                nodoParaBloque = this.dividirNodo(nodo, bloque.dimension.x, bloque.dimension.y);
             } else {
-                nodoParaBloque = this.growNode(block.dimension.x, block.dimension.y);
+                nodoParaBloque = this.crecerNodo(bloque.dimension.x, bloque.dimension.y);
             }
-            block.posicion = new Coord(nodoParaBloque.x, nodoParaBloque.y);
+            bloque.posicion = new Coord(nodoParaBloque.posX, nodoParaBloque.posY);
         }
+        this.dimension = new Coord(this.raiz.ancho, this.raiz.alto);
     }
 
-    private findNode(root: Nodo, w: number, h: number): Nodo {
-        if (root.used)
-            return this.findNode(root.right, w, h) || this.findNode(root.down, w, h);
-        else if ((w <= root.w) && (h <= root.h))
-            return root;
+    private encontrarNodo(raiz: Nodo, ancho: number, alto: number): Nodo {
+        if (raiz.usado)
+            return this.encontrarNodo(raiz.derecha, ancho, alto) || this.encontrarNodo(raiz.abajo, ancho, alto);
+        else if ((ancho <= raiz.ancho) && (alto <= raiz.alto))
+            return raiz;
         else
             return null;
     }
 
-    private splitNode(node: Nodo, w: number, h: number): Nodo {
-        node.used = true;
-        node.down = <Nodo> {x: node.x, y: node.y + h, w: node.w, h: node.h - h};
-        node.right = <Nodo> {x: node.x + w, y: node.y, w: node.w - w, h: h};
-        return node;
+    private dividirNodo(nodo: Nodo, ancho: number, alto: number): Nodo {
+        nodo.usado = true;
+        nodo.abajo = <Nodo> {posX: nodo.posX, posY: nodo.posY + alto, ancho: nodo.ancho, alto: nodo.alto - alto};
+        nodo.derecha = <Nodo> {posX: nodo.posX + ancho, posY: nodo.posY, ancho: nodo.ancho - ancho, alto: alto};
+        return nodo;
     }
 
-    private growNode(w: number, h: number): Nodo {
-        var canGrowDown = (w <= this.root.w);
-        var canGrowRight = (h <= this.root.h);
+    private crecerNodo(ancho: number, alto: number): Nodo {
+        var puedeCrecerAbajo = (ancho <= this.raiz.ancho);
+        var puedeCrecerDerecha = (alto <= this.raiz.alto);
 
-        var shouldGrowRight = canGrowRight && (this.root.h >= (this.root.w + w)); // attempt to keep square-ish by growing right when height is much greater than width
-        var shouldGrowDown = canGrowDown && (this.root.w >= (this.root.h + h)); // attempt to keep square-ish by growing down  when width  is much greater than height
+        var debeCrecerAbajo = puedeCrecerDerecha && (this.raiz.alto >= (this.raiz.ancho + ancho)); // attempt to keep square-ish by growing right when height is much greater than width
+        var debeCrecerDerecha = puedeCrecerAbajo && (this.raiz.ancho >= (this.raiz.alto + alto)); // attempt to keep square-ish by growing down  when width  is much greater than height
 
-        if (shouldGrowRight)
-            return this.growRight(w, h);
-        else if (shouldGrowDown)
-            return this.growDown(w, h);
-        else if (canGrowRight)
-            return this.growRight(w, h);
-        else if (canGrowDown)
-            return this.growDown(w, h);
+        if (debeCrecerAbajo)
+            return this.crecerDerecha(ancho, alto);
+        else if (debeCrecerDerecha)
+            return this.crecerBajo(ancho, alto);
+        else if (puedeCrecerDerecha)
+            return this.crecerDerecha(ancho, alto);
+        else if (puedeCrecerAbajo)
+            return this.crecerBajo(ancho, alto);
         else
             return null; // need to ensure sensible root starting size to avoid this happening
     }
 
-    private growRight(w: number, h: number): Nodo {
-        this.root = <Nodo> {
-            used: true,
-            x: 0,
-            y: 0,
-            w: this.root.w + w,
-            h: this.root.h,
-            down: this.root,
-            right: {x: this.root.w, y: 0, w: w, h: this.root.h}
+    private crecerDerecha(ancho: number, alto: number): Nodo {
+        this.raiz = <Nodo> {
+            usado: true,
+            posX: 0,
+            posY: 0,
+            ancho: this.raiz.ancho + ancho,
+            alto: this.raiz.alto,
+            abajo: this.raiz,
+            derecha: {posX: this.raiz.ancho, posY: 0, ancho: ancho, alto: this.raiz.alto}
         };
-        var node = this.findNode(this.root, w, h);
-        if (node)
-            return this.splitNode(node, w, h);
+        var nodo = this.encontrarNodo(this.raiz, ancho, alto);
+        if (nodo)
+            return this.dividirNodo(nodo, ancho, alto);
         else
             return null;
     }
 
-    private growDown(w: number, h: number): Nodo {
-        this.root = <Nodo> {
-            used: true,
-            x: 0,
-            y: 0,
-            w: this.root.w,
-            h: this.root.h + h,
-            down: {x: 0, y: this.root.h, w: this.root.w, h: h},
-            right: this.root
+    private crecerBajo(ancho: number, alto: number): Nodo {
+        this.raiz = <Nodo> {
+            usado: true,
+            posX: 0,
+            posY: 0,
+            ancho: this.raiz.ancho,
+            alto: this.raiz.alto + alto,
+            abajo: {posX: 0, posY: this.raiz.alto, ancho: this.raiz.ancho, alto: alto},
+            derecha: this.raiz
         };
-        var node = this.findNode(this.root, w, h);
-        if (node)
-            return this.splitNode(node, w, h);
+        var nodo = this.encontrarNodo(this.raiz, ancho, alto);
+        if (nodo)
+            return this.dividirNodo(nodo, ancho, alto);
         else
             return null;
     }
 
 };
+class Nodo {
+    posX: number;
+    posY: number;
+    ancho: number;
+    alto: number;
+    derecha: Nodo;
+    abajo: Nodo;
+    usado = false;
+    constructor({posX, posY, alto, ancho}: {posX: number; posY: number; alto: number; ancho: number;}) {
+        this.posX = posX;
+        this.posY = posY;
+        this.alto = alto;
+        this.ancho = ancho;
+    }
+}

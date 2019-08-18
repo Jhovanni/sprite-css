@@ -62,14 +62,10 @@ export class App {
             });
         })
     }
-    private cargarBloques(): Promise<any> {
-        this.bloques = [];
-        return cargarImagenes(this.archivos).then(imagenes => {
-            for (let i = 0; i < imagenes.length; i++) {
-                this.bloques.push(new BloqueImagen(imagenes[i]));
-            }
-            return Promise.resolve();
-        });
+    private async cargarBloques(): Promise<BloqueImagen[]> {
+        let imagenes = await cargarImagenes(this.archivos);
+        this.bloques = imagenes.map(imagen => new BloqueImagen(imagen));
+        return this.bloques;
     }
     private dibujarImagenes() {
         if (this.archivos === undefined || this.archivos.length <= 0) {
@@ -79,8 +75,8 @@ export class App {
         var areaDibujo = document.getElementById("dibujo");
         areaDibujo.innerText = "";
 
-        var dibujo = SVG(areaDibujo).size(this.packer.root.w, this.packer.root.h);
-        dibujo.viewbox(0, 0, this.packer.root.w, this.packer.root.h);
+        var dibujo = SVG(areaDibujo).size(this.packer.dimension.x, this.packer.dimension.y);
+        dibujo.viewbox(0, 0, this.packer.dimension.x, this.packer.dimension.y);
         dibujo.addClass("img-fluid");
         dibujo.addClass("center-block");
         var mouseover = function () {
@@ -93,7 +89,7 @@ export class App {
             var bloque = this.bloques[i];
             if (bloque.posicion) {
                 var rec = dibujo.rect(bloque.dimension.x, bloque.dimension.y).move(bloque.posicion.x, bloque.posicion.y).fill({color: colorAleatorio(), opacity: .1}).stroke("#000000");
-                dibujo.image(bloque.image.src).move(bloque.posicion.x, bloque.posicion.y).style("pointer-events", "none");
+                dibujo.image(bloque.imagen.src).move(bloque.posicion.x, bloque.posicion.y).style("pointer-events", "none");
                 rec.on("mouseover", mouseover);
                 rec.on("mouseout", mouseout);
                 dibujo.plain((i + 1).toString()).move(bloque.posicion.x, bloque.posicion.y).font({size: 24, family: "Georgia"}).fill("#000000");
@@ -102,8 +98,8 @@ export class App {
     }
     private generarCss(): void {
         this.bloques.sort((a, b) => {
-            var an = a.name.toLowerCase();
-            var bn = b.name.toLowerCase();
+            var an = a.nombre.toLowerCase();
+            var bn = b.nombre.toLowerCase();
             if (an > bn) {
                 return 1;
             } else if (an < bn) {
@@ -112,7 +108,7 @@ export class App {
                 return 0;
             }
         });
-        var width = this.packer.root.w, height = this.packer.root.h;
+        var width = this.packer.dimension.x, height = this.packer.dimension.y;
         var css = "";
         var reglaBase = ".".concat(this.claseBase, " { width: 100%; height: auto; display: inline-block; background-size: 0%; background-image: url(", this.claseBase, ".png);}\n");
         css += reglaBase;
@@ -125,12 +121,12 @@ export class App {
                 var sizeX = width / bloque.dimension.x * 100;
                 var sizeY = height / bloque.dimension.y * 100;
                 var aspectRatio = bloque.dimension.y / bloque.dimension.x * 100;
-                var regla = ".".concat(this.claseBase, ".", this.prefijo, bloque.name, " { padding-top: ", aspectRatio.toString(), "%; background-position: ", posX.toString(), "% ", posY.toString(), "%; background-size: ", sizeX.toString(), "% ", sizeY.toString(), "%;}\n");
+                var regla = ".".concat(this.claseBase, ".", this.prefijo, bloque.nombre, " { padding-top: ", aspectRatio.toString(), "%; background-position: ", posX.toString(), "% ", posY.toString(), "%; background-size: ", sizeX.toString(), "% ", sizeY.toString(), "%;}\n");
                 css += regla;
             }
         });
-        this.ejemplo = "&lt;span class=&quot;" + this.claseBase + " " + this.prefijo + this.bloques[0].name + "&quot;&gt;&lt;&#x2F;span&gt;";
-        this.ejemploVertical = "&lt;svg viewBox=&quot;0 0 100 150&quot; class=&quot;" + this.claseBase + " " + this.prefijo + this.bloques[0].name + " vertical&quot;&gt;&lt;&#x2F;svg&gt;";
+        this.ejemplo = "&lt;span class=&quot;" + this.claseBase + " " + this.prefijo + this.bloques[0].nombre + "&quot;&gt;&lt;&#x2F;span&gt;";
+        this.ejemploVertical = "&lt;svg viewBox=&quot;0 0 100 150&quot; class=&quot;" + this.claseBase + " " + this.prefijo + this.bloques[0].nombre + " vertical&quot;&gt;&lt;&#x2F;svg&gt;";
         this.cssGenerado = css;
     }
     copiarTexto(): void {
@@ -146,14 +142,14 @@ export class App {
             return;
         }
         var canvas = document.createElement("canvas");
-        canvas.width = this.packer.root.w;
-        canvas.height = this.packer.root.h;
+        canvas.width = this.packer.dimension.x;
+        canvas.height = this.packer.dimension.y;
         var ctx = canvas.getContext("2d");
         for (var i = 0; i < this.bloques.length; i++) {
             var bloque = this.bloques[i];
             if (bloque.posicion
             ) {
-                ctx.drawImage(bloque.image, bloque.posicion.x, bloque.posicion.y);
+                ctx.drawImage(bloque.imagen, bloque.posicion.x, bloque.posicion.y);
             }
         }
         const contenido = canvas.toDataURL("image/png");
