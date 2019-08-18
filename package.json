@@ -73,7 +73,7 @@
   ],
   "scripts": {
     "analyze": "au build --env prod --analyze",
-    "build": "au build",
+    "build": "au build --env prod",
     "start": "au run",
     "test": "au test"
   },
