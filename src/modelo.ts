@@ -10,6 +10,7 @@ export class Bloque {
     image: HTMLImageElement;
     name: string;
     dimension: Coord;
+    posicion: Coord;
     fit: Nodo;
     constructor(image: HTMLImageElement) {
         this.image = image;

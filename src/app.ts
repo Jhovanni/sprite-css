@@ -1,10 +1,10 @@
-import { autoinject, TaskQueue } from 'aurelia-framework';
-import { validateTrigger, ValidationController, ValidationRules } from "aurelia-validation";
+import {autoinject, TaskQueue} from 'aurelia-framework';
+import {validateTrigger, ValidationController, ValidationRules} from "aurelia-validation";
 import * as SVG from "svg.js";
-import { BootstrapFormRenderer } from "./bootstrapFormRenderer";
-import { Bloque } from "./modelo";
-import { GrowingPacker } from "./packerGrowing";
-import { cargarImagenes, colorAleatorio, porcentage, descargarComoArchivo } from "./util";
+import {BootstrapFormRenderer} from "./bootstrapFormRenderer";
+import {Bloque} from "./modelo";
+import {GrowingPacker} from "./packerGrowing";
+import {cargarImagenes, colorAleatorio, porcentage, descargarComoArchivo} from "./util";
 
 
 @autoinject
@@ -58,7 +58,7 @@ export class App {
             this.dibujarImagenes();
             this.generarCss();
             this.taskqeue.queueMicroTask(() => {
-                document.getElementById("divGenerado").scrollIntoView({ behavior: "smooth", block: "start" });
+                document.getElementById("divGenerado").scrollIntoView({behavior: "smooth", block: "start"});
             });
         })
     }
@@ -84,19 +84,19 @@ export class App {
         dibujo.addClass("img-fluid");
         dibujo.addClass("center-block");
         var mouseover = function () {
-            this.fill({ opacity: 1 });
+            this.fill({opacity: 1});
         }
         var mouseout = function () {
-            this.fill({ opacity: .1 });
+            this.fill({opacity: .1});
         }
         for (var i = 0; i < this.bloques.length; i++) {
             var bloque = this.bloques[i];
-            if (bloque.fit) {
-                var rec = dibujo.rect(bloque.dimension.x, bloque.dimension.y).move(bloque.fit.x, bloque.fit.y).fill({ color: colorAleatorio(), opacity: .1 }).stroke("#000000");
-                dibujo.image(bloque.image.src).move(bloque.fit.x, bloque.fit.y).style("pointer-events", "none");
+            if (bloque.posicion) {
+                var rec = dibujo.rect(bloque.dimension.x, bloque.dimension.y).move(bloque.posicion.x, bloque.posicion.y).fill({color: colorAleatorio(), opacity: .1}).stroke("#000000");
+                dibujo.image(bloque.image.src).move(bloque.posicion.x, bloque.posicion.y).style("pointer-events", "none");
                 rec.on("mouseover", mouseover);
                 rec.on("mouseout", mouseout);
-                dibujo.plain((i + 1).toString()).move(bloque.fit.x, bloque.fit.y).font({ size: 24, family: "Georgia" }).fill("#000000");
+                dibujo.plain((i + 1).toString()).move(bloque.posicion.x, bloque.posicion.y).font({size: 24, family: "Georgia"}).fill("#000000");
             }
         }
     }
@@ -119,9 +119,9 @@ export class App {
         var ajuste = "svg.".concat(this.claseBase, ".vertical, img.", this.claseBase, ".vertical{ height: 100%!important; width: auto!important; padding-top: 0!important;}\n");
         css += ajuste;
         this.bloques.forEach(bloque => {
-            if (bloque.fit) {
-                var posX = porcentage(bloque.fit.x, width, bloque.dimension.x);
-                var posY = porcentage(bloque.fit.y, height, bloque.dimension.y);
+            if (bloque.posicion) {
+                var posX = porcentage(bloque.posicion.x, width, bloque.dimension.x);
+                var posY = porcentage(bloque.posicion.y, height, bloque.dimension.y);
                 var sizeX = width / bloque.dimension.x * 100;
                 var sizeY = height / bloque.dimension.y * 100;
                 var aspectRatio = bloque.dimension.y / bloque.dimension.x * 100;
@@ -138,7 +138,7 @@ export class App {
             console.log("No hay texto generado");
             return;
         }
-        var t = <HTMLTextAreaElement>document.createElement("textarea");
+        var t = <HTMLTextAreaElement> document.createElement("textarea");
         t.style.position = 'fixed';
         t.style.top = "0";
         t.style.left = "0";
@@ -171,8 +171,9 @@ export class App {
         var ctx = canvas.getContext("2d");
         for (var i = 0; i < this.bloques.length; i++) {
             var bloque = this.bloques[i];
-            if (bloque.fit) {
-                ctx.drawImage(bloque.image, bloque.fit.x, bloque.fit.y);
+            if (bloque.posicion
+            ) {
+                ctx.drawImage(bloque.image, bloque.posicion.x, bloque.posicion.y);
             }
         }
         const contenido = canvas.toDataURL("image/png");
