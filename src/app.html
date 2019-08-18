@@ -1,4 +1,5 @@
 <template>
+    <require from="./iconos.scss"></require>
     <nav class="navbar navbar-dark navbar-expand-sm" style="background-color: #0b2545ff">
         <a class="navbar-brand" href="#">SpriteCSS</a>
     </nav>
@@ -26,15 +27,15 @@
         <div class="form-group">
             <label for="cssGenerado">CSS</label>
             <span class="float-right">
-                <a href="#" click.delegate="copiarTextoCSS()">Copiar&nbsp;<span class="glyphicon glyphicon-copy"></span></a>&nbsp;&nbsp;
-                <a href="#" click.delegate="descargarTextoCSS()">Descargar&nbsp;<span class="glyphicon glyphicon-download-alt"></span></a>
+                <a href="#" click.delegate="copiarTextoCSS()">Copiar&nbsp;<span class="icono-copy"></span></a>&nbsp;&nbsp;
+                <a href="#" click.delegate="descargarTextoCSS()">Descargar&nbsp;<span class="icono-download"></span></a>
             </span>
             <textarea class="form-control" value.bind="cssGenerado" rows="4" id="cssGenerado" style="resize: none;" readonly="true"></textarea>
         </div>
         <div class="form-group">
             <label>Ejemplo de uso</label>
             <a href="#" class="float-right" click.delegate="verAjusteVertical = !verAjusteVertical" onclick="return false;">
-                Ajuste vertical&nbsp;<span class="glyphicon glyphicon-question-sign"></span>
+                Ajuste vertical&nbsp;<span class="icono-question"></span>
             </a>
             <pre innerhtml.bind="ejemplo">
             </pre>
@@ -70,7 +71,7 @@
             <label>Hoja de sprites</label>
             <div class="col-xs-12 text-right">
                 <a href="#" download="png.png" click.delegate="descargarSpriteSheet()">
-                    Descargar imagen&nbsp;<span class="glyphicon glyphicon-download-alt"></span>
+                    Descargar imagen&nbsp;<span class="icono-download"></span>
                 </a>
                 <br>
                 <small><strong>Sugerencia:</strong>&nbsp;Usa un compresor como&nbsp;<a href="http://compresspng.com/" rel="nofollow" target="_blank">compresspng.com</a>&nbsp;para optimizar la imagen</small>
