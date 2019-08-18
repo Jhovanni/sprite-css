@@ -52,7 +52,8 @@ export class App {
         });
     }
     private generar(): void {
-        this.cargarBloques().then((bloques) => {
+        cargarImagenes(this.archivos).then((imagenes) => {
+            let bloques = imagenes.map(imagen => new BloqueImagen(imagen));
             this.packer = new GrowingPacker(bloques);
             this.packer.acomodar();
             this.dibujarImagenes();
@@ -60,11 +61,7 @@ export class App {
             this.taskqeue.queueMicroTask(() => {
                 document.getElementById("divGenerado").scrollIntoView({behavior: "smooth", block: "start"});
             });
-        })
-    }
-    private async cargarBloques(): Promise<BloqueImagen[]> {
-        let imagenes = await cargarImagenes(this.archivos);
-        return imagenes.map(imagen => new BloqueImagen(imagen));
+        });
     }
     private dibujarImagenes() {
         if (this.archivos === undefined || this.archivos.length <= 0) {
