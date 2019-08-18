@@ -17,8 +17,8 @@ export class App {
     private ejemplo = "";
     private ejemploVertical = "";
 
-    private bloques: BloqueImagen[];
-    private packer: GrowingPacker;
+    private packer: GrowingPacker<BloqueImagen>;
+
     private taskqeue: TaskQueue;
     private validationController: ValidationController;
     constructor(taskqeue: TaskQueue,
@@ -52,9 +52,9 @@ export class App {
         });
     }
     private generar(): void {
-        this.cargarBloques().then(() => {
-            this.packer = new GrowingPacker();
-            this.packer.fit(this.bloques);
+        this.cargarBloques().then((bloques) => {
+            this.packer = new GrowingPacker(bloques);
+            this.packer.acomodar();
             this.dibujarImagenes();
             this.generarCss();
             this.taskqeue.queueMicroTask(() => {
@@ -64,8 +64,7 @@ export class App {
     }
     private async cargarBloques(): Promise<BloqueImagen[]> {
         let imagenes = await cargarImagenes(this.archivos);
-        this.bloques = imagenes.map(imagen => new BloqueImagen(imagen));
-        return this.bloques;
+        return imagenes.map(imagen => new BloqueImagen(imagen));
     }
     private dibujarImagenes() {
         if (this.archivos === undefined || this.archivos.length <= 0) {
@@ -85,8 +84,8 @@ export class App {
         var mouseout = function () {
             this.fill({opacity: .1});
         }
-        for (var i = 0; i < this.bloques.length; i++) {
-            var bloque = this.bloques[i];
+        for (var i = 0; i < this.packer.bloques.length; i++) {
+            var bloque = this.packer.bloques[i];
             if (bloque.posicion) {
                 var rec = dibujo.rect(bloque.dimension.x, bloque.dimension.y).move(bloque.posicion.x, bloque.posicion.y).fill({color: colorAleatorio(), opacity: .1}).stroke("#000000");
                 dibujo.image(bloque.imagen.src).move(bloque.posicion.x, bloque.posicion.y).style("pointer-events", "none");
@@ -97,7 +96,7 @@ export class App {
         }
     }
     private generarCss(): void {
-        this.bloques.sort((a, b) => {
+        this.packer.bloques.sort((a, b) => {
             var an = a.nombre.toLowerCase();
             var bn = b.nombre.toLowerCase();
             if (an > bn) {
@@ -108,60 +107,57 @@ export class App {
                 return 0;
             }
         });
-        var width = this.packer.dimension.x, height = this.packer.dimension.y;
-        var css = "";
-        var reglaBase = ".".concat(this.claseBase, " { width: 100%; height: auto; display: inline-block; background-size: 0%; background-image: url(", this.claseBase, ".png);}\n");
-        css += reglaBase;
-        var ajuste = "svg.".concat(this.claseBase, ".vertical, img.", this.claseBase, ".vertical{ height: 100%!important; width: auto!important; padding-top: 0!important;}\n");
-        css += ajuste;
-        this.bloques.forEach(bloque => {
+        const anchoTotal = this.packer.dimension.x, altoTotal = this.packer.dimension.y;
+        const reglaBase = ".".concat(this.claseBase, " { width: 100%; height: auto; display: inline-block; background-size: 0%; background-image: url(", this.claseBase, ".png);}\n");
+        const ajuste = "svg.".concat(this.claseBase, ".vertical, img.", this.claseBase, ".vertical{ height: 100%!important; width: auto!important; padding-top: 0!important;}\n");
+        let css = reglaBase + ajuste;
+        this.packer.bloques.forEach(bloque => {
             if (bloque.posicion) {
-                var posX = porcentage(bloque.posicion.x, width, bloque.dimension.x);
-                var posY = porcentage(bloque.posicion.y, height, bloque.dimension.y);
-                var sizeX = width / bloque.dimension.x * 100;
-                var sizeY = height / bloque.dimension.y * 100;
-                var aspectRatio = bloque.dimension.y / bloque.dimension.x * 100;
-                var regla = ".".concat(this.claseBase, ".", this.prefijo, bloque.nombre, " { padding-top: ", aspectRatio.toString(), "%; background-position: ", posX.toString(), "% ", posY.toString(), "%; background-size: ", sizeX.toString(), "% ", sizeY.toString(), "%;}\n");
+                var posX = porcentage(bloque.posicion.x, anchoTotal, bloque.dimension.x);
+                var posY = porcentage(bloque.posicion.y, altoTotal, bloque.dimension.y);
+                var sizeX = anchoTotal / bloque.dimension.x * 100;
+                var sizeY = altoTotal / bloque.dimension.y * 100;
+                var relacionAspecto = bloque.dimension.y / bloque.dimension.x * 100;
+                var regla = ".".concat(this.claseBase, ".", this.prefijo, bloque.nombre, " { padding-top: ", relacionAspecto.toString(), "%; background-position: ", posX.toString(), "% ", posY.toString(), "%; background-size: ", sizeX.toString(), "% ", sizeY.toString(), "%;}\n");
                 css += regla;
             }
         });
-        this.ejemplo = "&lt;span class=&quot;" + this.claseBase + " " + this.prefijo + this.bloques[0].nombre + "&quot;&gt;&lt;&#x2F;span&gt;";
-        this.ejemploVertical = "&lt;svg viewBox=&quot;0 0 100 150&quot; class=&quot;" + this.claseBase + " " + this.prefijo + this.bloques[0].nombre + " vertical&quot;&gt;&lt;&#x2F;svg&gt;";
+        this.ejemplo = "&lt;span class=&quot;" + this.claseBase + " " + this.prefijo + this.packer.bloques[0].nombre + "&quot;&gt;&lt;&#x2F;span&gt;";
+        this.ejemploVertical = "&lt;svg viewBox=&quot;0 0 100 150&quot; class=&quot;" + this.claseBase + " " + this.prefijo + this.packer.bloques[0].nombre + " vertical&quot;&gt;&lt;&#x2F;svg&gt;";
         this.cssGenerado = css;
     }
-    copiarTexto(): void {
-        if (this.cssGenerado === null) {
-            console.log("No hay texto generado");
-            return;
-        }
-        copiarAlPortapapeles(this.cssGenerado, document);
-    }
+
     descargarSpriteSheet() {
-        if (this.packer == null || this.bloques === null) {
-            console.log("Packer no generado o sin imagenes");
-            return;
+        if (this.packer != null && this.packer.bloques !== null) {
+            const canvas = this.dibujarEnNuevoCanvas();
+            const contenido = canvas.toDataURL("image/png");
+            descargarComoArchivo(contenido, "sprites.png", document);
         }
+    }
+    private dibujarEnNuevoCanvas(): HTMLCanvasElement {
         var canvas = document.createElement("canvas");
         canvas.width = this.packer.dimension.x;
         canvas.height = this.packer.dimension.y;
         var ctx = canvas.getContext("2d");
-        for (var i = 0; i < this.bloques.length; i++) {
-            var bloque = this.bloques[i];
+        for (var i = 0; i < this.packer.bloques.length; i++) {
+            var bloque = this.packer.bloques[i];
             if (bloque.posicion
             ) {
                 ctx.drawImage(bloque.imagen, bloque.posicion.x, bloque.posicion.y);
             }
         }
-        const contenido = canvas.toDataURL("image/png");
-        descargarComoArchivo(contenido, "sprites.png", document);
+        return canvas;
+    }
+    copiarTextoCSS(): void {
+        if (this.cssGenerado !== null) {
+            copiarAlPortapapeles(this.cssGenerado, document);
+        }
     }
     descargarTextoCSS(): void {
-        if (this.cssGenerado === null) {
-            console.log("No hay texto generado");
-            return;
+        if (this.cssGenerado !== null) {
+            const contenido = "data:text/plain;charset=utf-8," + encodeURIComponent(this.cssGenerado);
+            descargarComoArchivo(contenido, "sprite.css", document);
         }
-        const contenido = "data:text/plain;charset=utf-8," + encodeURIComponent(this.cssGenerado);
-        descargarComoArchivo(contenido, "sprite.css", document);
     }
 
 
