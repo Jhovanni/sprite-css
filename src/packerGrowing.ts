@@ -56,8 +56,23 @@
  
  
  ******************************************************************************/
-import {Bloque, Nodo, Coord} from "./modelo";
+import {Bloque, Coord} from "./modelo";
 
+class Nodo {
+    x: number;
+    y: number;
+    h: number;
+    w: number;
+    right: Nodo;
+    down: Nodo;
+    used = false;
+    constructor(x: number, y: number, h: number, w: number) {
+        this.x = x;
+        this.y = y;
+        this.h = h;
+        this.w = w;
+    }
+}
 export class GrowingPacker {
     root: Nodo;
     fit(blocks: Bloque[]) {
@@ -68,15 +83,18 @@ export class GrowingPacker {
         var w = len > 0 ? blocks[0].dimension.x : 0;
         var h = len > 0 ? blocks[0].dimension.y : 0;
         this.root = <Nodo> {x: 0, y: 0, w: w, h: h};
+
         for (var i = 0; i < blocks.length; i++) {
             var block = blocks[i];
             var node = this.findNode(this.root, block.dimension.x, block.dimension.y);
+
+            let nodoParaBloque = null;
             if (node) {
-                block.fit = this.splitNode(node, block.dimension.x, block.dimension.y);
+                nodoParaBloque = this.splitNode(node, block.dimension.x, block.dimension.y);
             } else {
-                block.fit = this.growNode(block.dimension.x, block.dimension.y);
+                nodoParaBloque = this.growNode(block.dimension.x, block.dimension.y);
             }
-            block.posicion = new Coord(block.fit.x, block.fit.y);
+            block.posicion = new Coord(nodoParaBloque.x, nodoParaBloque.y);
         }
     }
 
