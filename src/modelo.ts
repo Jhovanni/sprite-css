@@ -1,14 +1,20 @@
+export class Coord {
+    x: number;
+    y: number;
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+}
 export class Bloque {
     image: HTMLImageElement;
     name: string;
-    w: number;
-    h: number;
+    dimension: Coord;
     fit: Nodo;
     constructor(image: HTMLImageElement) {
         this.image = image;
         this.name = image.name.split(".")[0].replace(/\W/g, '-');
-        this.w = image.width;
-        this.h = image.height;
+        this.dimension = new Coord(image.width, image.height);
     }
 }
 export class Nodo {

@@ -92,7 +92,7 @@ export class App {
         for (var i = 0; i < this.bloques.length; i++) {
             var bloque = this.bloques[i];
             if (bloque.fit) {
-                var rec = dibujo.rect(bloque.w, bloque.h).move(bloque.fit.x, bloque.fit.y).fill({ color: colorAleatorio(), opacity: .1 }).stroke("#000000");
+                var rec = dibujo.rect(bloque.dimension.x, bloque.dimension.y).move(bloque.fit.x, bloque.fit.y).fill({ color: colorAleatorio(), opacity: .1 }).stroke("#000000");
                 dibujo.image(bloque.image.src).move(bloque.fit.x, bloque.fit.y).style("pointer-events", "none");
                 rec.on("mouseover", mouseover);
                 rec.on("mouseout", mouseout);
@@ -120,11 +120,11 @@ export class App {
         css += ajuste;
         this.bloques.forEach(bloque => {
             if (bloque.fit) {
-                var posX = porcentage(bloque.fit.x, width, bloque.w);
-                var posY = porcentage(bloque.fit.y, height, bloque.h);
-                var sizeX = width / bloque.w * 100;
-                var sizeY = height / bloque.h * 100;
-                var aspectRatio = bloque.h / bloque.w * 100;
+                var posX = porcentage(bloque.fit.x, width, bloque.dimension.x);
+                var posY = porcentage(bloque.fit.y, height, bloque.dimension.y);
+                var sizeX = width / bloque.dimension.x * 100;
+                var sizeY = height / bloque.dimension.y * 100;
+                var aspectRatio = bloque.dimension.y / bloque.dimension.x * 100;
                 var regla = ".".concat(this.claseBase, ".", this.prefijo, bloque.name, " { padding-top: ", aspectRatio.toString(), "%; background-position: ", posX.toString(), "% ", posY.toString(), "%; background-size: ", sizeX.toString(), "% ", sizeY.toString(), "%;}\n");
                 css += regla;
             }
