@@ -2,7 +2,7 @@ import {autoinject, TaskQueue} from 'aurelia-framework';
 import {validateTrigger, ValidationController, ValidationRules} from "aurelia-validation";
 import * as SVG from "svg.js";
 import {BootstrapFormRenderer} from "./bootstrapFormRenderer";
-import {Bloque} from "./modelo";
+import {BloqueImagen} from "./modelo";
 import {GrowingPacker} from "./packerGrowing";
 import {cargarImagenes, colorAleatorio, porcentage, descargarComoArchivo} from "./util";
 
@@ -17,7 +17,7 @@ export class App {
     private ejemplo = "";
     private ejemploVertical = "";
 
-    private bloques: Bloque[];
+    private bloques: BloqueImagen[];
     private packer: GrowingPacker;
     private taskqeue: TaskQueue;
     private validationController: ValidationController;
@@ -66,7 +66,7 @@ export class App {
         this.bloques = [];
         return cargarImagenes(this.archivos).then(imagenes => {
             for (let i = 0; i < imagenes.length; i++) {
-                this.bloques.push(new Bloque(imagenes[i]));
+                this.bloques.push(new BloqueImagen(imagenes[i]));
             }
             return Promise.resolve();
         });

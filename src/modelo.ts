@@ -7,11 +7,14 @@ export class Coord {
     }
 }
 export class Bloque {
-    image: HTMLImageElement;
-    name: string;
     dimension: Coord;
     posicion: Coord;
+}
+export class BloqueImagen extends Bloque {
+    image: HTMLImageElement;
+    name: string;
     constructor(image: HTMLImageElement) {
+        super();
         this.image = image;
         this.name = image.name.split(".")[0].replace(/\W/g, '-');
         this.dimension = new Coord(image.width, image.height);
