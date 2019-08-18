@@ -4,7 +4,7 @@ import * as SVG from "svg.js";
 import {BootstrapFormRenderer} from "./bootstrapFormRenderer";
 import {BloqueImagen} from "./modelo";
 import {GrowingPacker} from "./packerGrowing";
-import {cargarImagenes, colorAleatorio, porcentage, descargarComoArchivo} from "./util";
+import {cargarImagenes, colorAleatorio, porcentage, descargarComoArchivo, copiarAlPortapapeles} from "./util";
 
 
 @autoinject
@@ -138,27 +138,7 @@ export class App {
             console.log("No hay texto generado");
             return;
         }
-        var t = <HTMLTextAreaElement> document.createElement("textarea");
-        t.style.position = 'fixed';
-        t.style.top = "0";
-        t.style.left = "0";
-        t.style.width = '2em';
-        t.style.height = '2em';
-        t.style.padding = "0";
-        t.style.border = 'none';
-        t.style.outline = 'none';
-        t.style.boxShadow = 'none';
-        t.style.background = 'transparent';
-        t.value = this.cssGenerado;
-
-        document.body.appendChild(t);
-        t.select();
-        try {
-            document.execCommand(("Copy"));
-        } catch (err) {
-            console.log("Copia no permitida");
-        }
-        document.body.removeChild(t);
+        copiarAlPortapapeles(this.cssGenerado, document);
     }
     descargarSpriteSheet() {
         if (this.packer == null || this.bloques === null) {

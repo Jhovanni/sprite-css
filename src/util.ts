@@ -11,7 +11,7 @@ export function cargarImagen(archivo: File): Promise<HTMLImageElement> {
         var image = new Image();
         var reader = new FileReader();
         reader.onload = () => {
-            image.src = reader.result;
+            image.src = <string> reader.result;
         }
         image.onload = () => {
             image.name = archivo.name;
@@ -56,4 +56,28 @@ export function descargarComoArchivo(contenido: string, nombreArchivo: string, d
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+}
+
+export function copiarAlPortapapeles(texto: string, document: Document): void {
+    var t = <HTMLTextAreaElement> document.createElement("textarea");
+    t.style.position = 'fixed';
+    t.style.top = "0";
+    t.style.left = "0";
+    t.style.width = '2em';
+    t.style.height = '2em';
+    t.style.padding = "0";
+    t.style.border = 'none';
+    t.style.outline = 'none';
+    t.style.boxShadow = 'none';
+    t.style.background = 'transparent';
+    t.value = texto;
+
+    document.body.appendChild(t);
+    t.select();
+    try {
+        document.execCommand(("Copy"));
+    } catch (err) {
+        console.log("Copia no permitida");
+    }
+    document.body.removeChild(t);
 }
